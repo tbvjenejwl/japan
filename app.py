@@ -3,7 +3,7 @@ import datetime
 from dateutil.relativedelta import relativedelta, MO
 from flask import Flask, render_template
 
-app = Flask(__name__, template_folder=os.getcwd()))
+app = Flask(__name__, template_folder=os.getcwd())
 
 @app.route('/')
 def index():
