@@ -1,0 +1,92 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiple FullCalendar Instances</title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.9/index.global.min.js" integrity="sha512-XcSx5820pzZbdZYdvoBBKzuOivQv7oQMd+7JuUHh0jhMwqsWHOf+yRfZRxCtV0ySEKWtKblijTdl9pvODcmD7A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <style>
+        .calendar-instance {
+            float: left;
+            margin: 10px;
+            width: calc(20% - 20px); /* PC에서 한 줄에 4개 */
+        }
+
+        @media (max-width: 767px) {
+            .calendar-instance {
+                float: none;
+                width: calc(100% - 20px); /* 모바일에서 한 줄에 1개 */
+            }
+        }
+
+        .fc-toolbar-title {
+            font-size: 1em; /* 달력 제목 크기 조정 */
+        }
+		.fc-header-toolbar {
+			font-size: 10px; /* 원하는 폰트 크기로 조정 */
+		}
+    </style>
+</head>
+<body>
+    <div id="calendar-container"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.getElementById('calendar-container');
+            const startDate = new Date();
+            const endDate = new Date(startDate.getFullYear() + 1, 11, 31);
+
+			const peakDates = {{ result['성수기']|tojson }};
+			const superPeakDates = {{ result['초성수기']|tojson }};
+
+            for (let d = new Date(startDate); d <= endDate; d.setMonth(d.getMonth() + 1)) {
+                const calendarEl = document.createElement('div');
+                calendarEl.className = 'calendar-instance';
+                container.appendChild(calendarEl);
+
+                const calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth',
+                    initialDate: new Date(d),
+					showNonCurrentDates: false, // 현재 달이 아닌 날짜 숨기기
+                    headerToolbar: {
+						center: '',
+						right: ''
+					},
+					height: 'auto',
+					titleFormat: function(date) {
+						// 날짜 객체에서 연도와 월을 추출
+						let year = date.date.year; // 연도
+						let month = date.date.month + 1; // 월 (0-11 범위의 값을 가지므로 1을 더함)
+
+						// 연도와 월을 두 자리 형태로 포매팅
+						year = String(year).slice(-2); // 연도의 마지막 두 자리
+						month = month < 10 ? '0' + month : String(month); // 월을 두 자리로 만듦
+
+						return year + '년 ' + month + "월"; // 'yy/MM' 형태로 반환
+					},
+					events: [
+						...createEvents(superPeakDates, '#f28b82'), // 옅은 빨강
+						...createEvents(peakDates, '#fbbc04') // 옅은 주황
+					]
+                });
+                calendar.render();
+            }
+        });
+		function createEvents(dates, color) {
+			return dates.map(dateString => {
+				const date = new Date(dateString);
+				const formattedDate = date.toISOString().split('T')[0]; // 'YYYY-MM-DD' 형식으로 변환
+
+				return { 
+					title: '', // 이벤트에 표시할 텍스트 (비어있음)
+					start: formattedDate, // 변환된 이벤트 시작 날짜
+					color: color, // 이벤트 색상
+					display: 'background'
+				};
+			});
+		}
+
+    </script>
+</body>
+</html>
