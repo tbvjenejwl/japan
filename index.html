@@ -72,6 +72,13 @@
                 });
                 calendar.render();
             }
+			// 모든 'fc-event' 클래스를 가진 요소를 선택
+			var events = document.querySelectorAll('.fc-event');
+
+			// 각 요소에 대해 스타일 적용
+			events.forEach(function(event) {
+				event.style.setProperty('background-color', 'rgb(251, 188, 4)', 'important');
+			});
         });
 		function createEvents(dates, color) {
 			return dates.map(dateString => {
